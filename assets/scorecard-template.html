@@ -1,0 +1,263 @@
+<!--
+  Reference structure for the AI Title Fit Scorecard, taken from the session
+  this skill was built from. This is a STRUCTURAL reference, not a brand to
+  copy verbatim — per artifact-design, pick fresh colors/type for each user's
+  report. What's worth keeping as-is: the information architecture (hero
+  verdict -> method -> sorted bar chart -> skill ledger -> matrix ->
+  strengths/gaps), the dot-score notation, and the core/supporting color
+  logic in the matrix (good=covers a core requirement, gap=fails one,
+  mid=partial coverage of one, faint=merely supporting, unscored on purpose).
+
+  Sections below show ONE example row each so the pattern is clear; repeat
+  the pattern for every skill/title in the actual report. Placeholder text
+  is in {{double braces}}.
+-->
+<title>{{Person}}'s AI Engineering Fit Scorecard</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --paper: #f6f3ec;
+    --paper-raised: #ffffff;
+    --paper-sunken: #ebe6d9;
+    --ink: #221f1a;
+    --ink-soft: #5f594c;
+    --ink-faint: #93897a;
+    --line: #ddd5c2;
+    --accent: #a8621f;
+    --accent-soft: #f3e3cc;
+    --accent-ink: #7a4515;
+    --good-bg: #e3f0e6;
+    --good-ink: #22543d;
+    --gap-bg: #f5e2dc;
+    --gap-ink: #8c3a2b;
+    --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+    --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  }
+  /* Swap every value above and below for a palette/type pairing you chose
+     for THIS user's report — see artifact-design before touching this file. */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #1c1914; --paper-raised: #26221b; --paper-sunken: #15130f;
+      --ink: #ede7d9; --ink-soft: #b3ab98; --ink-faint: #7d7663; --line: #3c362a;
+      --accent: #e0a15c; --accent-soft: #3a2c1a; --accent-ink: #f0c896;
+      --good-bg: #203327; --good-ink: #7fc498; --gap-bg: #3a231f; --gap-ink: #e18e7e;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #1c1914; --paper-raised: #26221b; --paper-sunken: #15130f;
+    --ink: #ede7d9; --ink-soft: #b3ab98; --ink-faint: #7d7663; --line: #3c362a;
+    --accent: #e0a15c; --accent-soft: #3a2c1a; --accent-ink: #f0c896;
+    --good-bg: #203327; --good-ink: #7fc498; --gap-bg: #3a231f; --gap-ink: #e18e7e;
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.6; }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 0 1.5rem; }
+
+  header.hero { border-bottom: 1px solid var(--line); padding: 3rem 0 2.2rem; background: linear-gradient(180deg, var(--paper-sunken), var(--paper) 75%); }
+  .eyebrow { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin: 0 0 0.9rem; }
+  h1 { font-family: var(--font-display); font-weight: 600; font-size: clamp(1.8rem, 1.35rem + 1.8vw, 2.6rem); line-height: 1.14; text-wrap: balance; margin: 0 0 1rem; letter-spacing: -0.01em; }
+  .hero p.lede { max-width: 60ch; font-size: 1.05rem; color: var(--ink-soft); margin: 0; }
+
+  .verdict-card { margin-top: 1.8rem; background: var(--paper-raised); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 6px; padding: 1.2rem 1.4rem; }
+  .verdict-card .q { font-family: var(--font-display); font-weight: 600; font-size: 1.1rem; margin: 0 0 0.4rem; }
+  .verdict-card .a { margin: 0; color: var(--ink); }
+  .verdict-card .a b { color: var(--accent-ink); }
+
+  section { padding: 2.6rem 0; border-bottom: 1px solid var(--line); }
+  section:last-of-type { border-bottom: none; }
+  .section-head { margin-bottom: 1.4rem; }
+  .kicker { font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 0.5rem; }
+  h2 { font-family: var(--font-display); font-weight: 600; font-size: clamp(1.25rem, 1.05rem + 0.7vw, 1.55rem); margin: 0 0 0.45rem; }
+  .section-head p { margin: 0; color: var(--ink-soft); max-width: 66ch; }
+
+  .method-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+  @media (max-width: 640px) { .method-grid { grid-template-columns: 1fr; } }
+  .method-card { background: var(--paper-raised); border: 1px solid var(--line); border-radius: 6px; padding: 1rem 1.1rem; }
+  .method-card .step { font-family: var(--font-mono); font-size: 0.68rem; color: var(--accent); letter-spacing: 0.08em; margin: 0 0 0.4rem; }
+  .method-card p { margin: 0; font-size: 0.9rem; color: var(--ink-soft); }
+  .method-card p b { color: var(--ink); font-weight: 600; }
+
+  /* Bar chart: one accent hue, sorted strongest->weakest, direct-labeled. See dataviz skill. */
+  .bar-row { display: grid; grid-template-columns: 190px 1fr 56px; align-items: center; gap: 0.8rem; margin-bottom: 0.65rem; }
+  @media (max-width: 560px) { .bar-row { grid-template-columns: 120px 1fr 44px; } }
+  .bar-label { font-size: 0.88rem; color: var(--ink); text-align: right; }
+  .bar-label .note { display: block; font-family: var(--font-mono); font-size: 0.66rem; color: var(--ink-faint); text-align: right; margin-top: 0.1rem; }
+  .bar-track { position: relative; height: 20px; background: var(--paper-sunken); border-radius: 3px; overflow: hidden; }
+  .bar-fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--accent); border-radius: 3px; }
+  .bar-value { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 0.86rem; color: var(--ink); font-weight: 600; }
+  .bar-foot { font-size: 0.82rem; color: var(--ink-faint); margin-top: 0.6rem; }
+
+  .table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; }
+  table { border-collapse: collapse; width: 100%; background: var(--paper-raised); }
+  #ledger-table { min-width: 640px; }
+  #ledger-table thead th { text-align: left; font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-faint); padding: 0.8rem 1rem; border-bottom: 1px solid var(--line); background: var(--paper-sunken); }
+  #ledger-table tbody td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--line); vertical-align: top; font-size: 0.9rem; }
+  #ledger-table tbody tr:last-child td { border-bottom: none; }
+  #ledger-table tbody tr.group-row th { font-family: var(--font-mono); font-size: 0.64rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); background: var(--paper-sunken); padding: 0.6rem 1rem; text-align: left; border-bottom: 1px solid var(--line); }
+  #ledger-table td.skill-cell { font-weight: 600; white-space: nowrap; }
+  #ledger-table td.dots { font-family: var(--font-mono); white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--accent); }
+  #ledger-table td.dots.gap { color: var(--gap-ink); }
+  #ledger-table td.evidence { color: var(--ink-soft); max-width: 40ch; }
+  .flag { display: inline-block; font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.04em; text-transform: uppercase; padding: 0.15em 0.5em; border-radius: 999px; }
+  .flag.gap { background: var(--gap-bg); color: var(--gap-ink); }
+  .flag.strength { background: var(--good-bg); color: var(--good-ink); }
+
+  /* Matrix: core cell colored by whether the score covers/gaps/mid-fills the
+     requirement; supporting cell stays faint and uncolored (not scored). */
+  .matrix-hint { font-size: 0.8rem; color: var(--ink-faint); margin: 0 0 0.7rem; display: none; }
+  @media (max-width: 700px) { .matrix-hint { display: block; } }
+  #fit-matrix { min-width: 800px; }
+  #fit-matrix th, #fit-matrix td { padding: 0.5rem 0.6rem; border-bottom: 1px solid var(--line); }
+  #fit-matrix thead th.skillcol { text-align: left; min-width: 220px; font-family: var(--font-mono); font-size: 0.64rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-faint); background: var(--paper-sunken); }
+  #fit-matrix thead th.rolecol { text-align: center; font-family: var(--font-mono); font-size: 0.66rem; min-width: 68px; background: var(--paper-sunken); color: var(--ink-soft); }
+  #fit-matrix tbody th { text-align: left; font-weight: 400; font-size: 0.84rem; color: var(--ink); background: var(--paper-raised); position: sticky; left: 0; border-right: 1px solid var(--line); }
+  #fit-matrix tbody td { text-align: center; }
+  #fit-matrix tbody tr.group-row th { font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); background: var(--paper-sunken); padding-top: 0.65rem; padding-bottom: 0.3rem; }
+  #fit-matrix tbody tr.group-row td { background: var(--paper-sunken); }
+  .dot { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 999px; font-size: 0.8rem; }
+  .dot.good { background: var(--good-bg); color: var(--good-ink); font-weight: 700; }   /* core requirement, score 4-5 */
+  .dot.gap { background: var(--gap-bg); color: var(--gap-ink); font-weight: 700; }      /* core requirement, score 1-2 */
+  .dot.mid { background: var(--accent-soft); color: var(--accent-ink); font-weight: 700; } /* core requirement, score 3 */
+  .dot.partial { color: var(--ink-faint); }                                              /* supporting requirement, any score */
+  .matrix-key { display: flex; flex-wrap: wrap; gap: 1.1rem; margin-top: 1rem; font-size: 0.8rem; color: var(--ink-soft); align-items: center; }
+  .matrix-key .k-dot { display: inline-flex; align-items: center; gap: 0.4em; }
+
+  .gap-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4rem; }
+  @media (max-width: 700px) { .gap-grid { grid-template-columns: 1fr; } }
+  .gap-card { background: var(--paper-raised); border: 1px solid var(--line); border-radius: 8px; padding: 1.3rem 1.4rem; }
+  .gap-card h3 { font-family: var(--font-display); font-size: 1.05rem; margin: 0 0 0.8rem; }
+  .gap-card.strengths h3 { color: var(--good-ink); }
+  .gap-card.gaps h3 { color: var(--gap-ink); }
+  .gap-card ul { margin: 0; padding-left: 1.1rem; }
+  .gap-card li { margin-bottom: 0.55rem; font-size: 0.92rem; }
+  .gap-card li b { font-weight: 600; }
+
+  footer { padding: 2.2rem 0 3rem; color: var(--ink-faint); font-size: 0.83rem; }
+  footer p { max-width: 66ch; margin: 0 0 0.5rem; }
+</style>
+
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow">{{Self-assessment tagline}}</p>
+    <h1>{{Report title, specific to the person's actual question}}</h1>
+    <p class="lede">{{N}} skills, scored 1-5 from what's actually in {{their}} workspace, public repos, and résumé, checked against {{M}} real current AI-engineering titles.</p>
+    <div class="verdict-card">
+      <p class="q">{{The specific question they asked, e.g. "Are you an Agentic Engineer?"}}</p>
+      <p class="a">{{Direct answer with the number, the top 1-2 fitting titles named, and the single clearest gap named. This is the one paragraph someone reads if they read nothing else.}}</p>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section id="method">
+    <div class="section-head">
+      <p class="kicker">01 &middot; Method</p>
+      <h2>How the score was built</h2>
+      <p>Every skill score is anchored to something findable, not a self-report.</p>
+    </div>
+    <div class="method-grid">
+      <div class="method-card"><p class="step">Step 1</p><p><b>{{N}} skills, {{M}} titles.</b> {{Where they came from, and anything dropped and why.}}</p></div>
+      <div class="method-card"><p class="step">Step 2</p><p><b>Score each skill 1-5</b> from workspace evidence: {{list the actual sources checked}}.</p></div>
+      <div class="method-card"><p class="step">Step 3</p><p><b>Weight by requirement, sharply.</b> Core skills count 2&times;, supporting skills only 0.5&times;, so no title is propped up by generic skills it doesn't actually select for.</p></div>
+    </div>
+  </section>
+
+  <section id="ranking">
+    <div class="section-head">
+      <p class="kicker">02 &middot; Title fit</p>
+      <h2>Fit score by title, out of 5</h2>
+    </div>
+    <!-- One .bar-row per title, sorted strongest score first. Width% = (score/5)*100. -->
+    <div class="bar-row">
+      <div class="bar-label">{{Title name}}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:{{pct}}%"></div></div>
+      <div class="bar-value">{{score}}</div>
+    </div>
+    <p class="bar-foot">Scale: 1 (no evidence / not practiced) to 5 (proficient, shipped repeatedly).</p>
+  </section>
+
+  <section id="ledger">
+    <div class="section-head">
+      <p class="kicker">03 &middot; Skill ledger</p>
+      <h2>Your score on each of the {{N}} skills</h2>
+    </div>
+    <div class="table-scroll">
+      <table id="ledger-table">
+        <thead><tr><th>Skill</th><th>Score</th><th>Evidence</th><th>Flag</th></tr></thead>
+        <tbody>
+          <!-- One group-row per category; within it, skills ordered strongest -> weakest score. -->
+          <tr class="group-row"><th colspan="4">{{Category name}}</th></tr>
+          <tr>
+            <td class="skill-cell">{{Skill name}}</td>
+            <td class="dots">{{●●●○○ — filled = score, e.g. 3/5 shown as 3 filled + 2 empty; add class="dots gap" if score <=2}}</td>
+            <td class="evidence">{{One citable sentence: project, résumé line, or file path.}}</td>
+            <td>{{optional: <span class="flag strength">strength</span> or <span class="flag gap">gap</span>}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="matrix">
+    <div class="section-head">
+      <p class="kicker">04 &middot; Fit matrix</p>
+      <h2>Your score against each title's core requirements</h2>
+      <p>Colored dots mark cells where the title treats the skill as <b>core</b>: green where your score covers it (4-5), amber where it's a real gap (1-2), neutral where you're mid-way (3). Faint dots are supporting skills, unscored here since they rarely decide fit.</p>
+    </div>
+    <p class="matrix-hint">Scroll sideways to see every title &rarr;</p>
+    <div class="table-scroll">
+      <table id="fit-matrix">
+        <thead>
+          <tr>
+            <th class="skillcol">Skill</th>
+            <!-- One th.rolecol per title -->
+            <th class="rolecol">{{Title}}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="group-row"><th colspan="1">{{Category name}}</th><td colspan="{{title count}}"></td></tr>
+          <!-- One row per skill; th shows "Skill (score/5)"; one td per title:
+               core cell -> <span class="dot good|mid|gap">●</span>
+               supporting cell -> <span class="dot partial">◐</span>
+               not applicable -> empty <td></td> -->
+          <tr>
+            <th>{{Skill}} ({{score}}/5)</th>
+            <td><span class="dot good">&#9679;</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="matrix-key">
+      <span class="k-dot"><span class="dot good" style="width:16px;height:16px;font-size:0.6rem;">&#9679;</span> core, your score covers it (4-5)</span>
+      <span class="k-dot"><span class="dot mid" style="width:16px;height:16px;font-size:0.6rem;">&#9679;</span> core, you're mid-way (3)</span>
+      <span class="k-dot"><span class="dot gap" style="width:16px;height:16px;font-size:0.6rem;">&#9679;</span> core, real gap (1-2)</span>
+      <span class="k-dot"><span class="dot partial" style="font-size:0.9rem;">&#9690;</span> supporting skill, not scored here</span>
+    </div>
+  </section>
+
+  <section id="gaps">
+    <div class="section-head">
+      <p class="kicker">05 &middot; Reading it</p>
+      <h2>What to lean on, what to close</h2>
+    </div>
+    <div class="gap-grid">
+      <div class="gap-card strengths">
+        <h3>What you already have</h3>
+        <ul><li><b>{{Skill}}</b>, {{why it's genuinely strong, one line}}</li></ul>
+      </div>
+      <div class="gap-card gaps">
+        <h3>What's actually missing</h3>
+        <ul><li><b>{{Skill}}</b> &mdash; {{what's missing and which title it blocks}}</li></ul>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p><b>Method note.</b> Scores are anchored to artifacts found in the person's workspace, résumé, and public repos, not to self-report. Skills with no supporting evidence are scored 1, not omitted, so gaps stay visible rather than silently dropped from the average.</p>
+  </footer>
+
+</main>
